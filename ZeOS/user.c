@@ -6,5 +6,6 @@ int __attribute__ ((__section__(".text.main")))
 
 main(void) {
   write(1, " Hola, bienvenido!", strlen(" Hola, bienvenido!"));
+  gettime();
   while(1) { }
 }

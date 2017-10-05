@@ -3,8 +3,8 @@
  *
  *  Copyright (C) 1991, 1992  Linus Torvalds
  *  Copyright (C) 1997 Martin Mares
- *  2003 Modificat per Zeus Gómez per insertar el codi d'usuari
- *       també a la imatge del nucli en espai d'adreces separat.
+ *  2003 Modificat per Zeus Gï¿½mez per insertar el codi d'usuari
+ *       tambï¿½ a la imatge del nucli en espai d'adreces separat.
  */
 
 /*
@@ -54,8 +54,7 @@ typedef  u_int32_t u32;
 byte buf[1024];
 int fd;
 
-void die(const char * str, ...)
-{
+void die(const char * str, ...) {
 	va_list args;
 	va_start(args, str);
 	vfprintf(stderr, str, args);
@@ -67,8 +66,7 @@ void die(const char * str, ...)
 
 #define MINIX_HEADER_LEN 32
 
-void minix_open(const char *name)
-{
+void minix_open(const char *name) {
 	static byte hdr[] = { 0x01, 0x03, 0x10, 0x04, 0x20, 0x00, 0x00, 0x00 };
 	static u32 *lb = (u32 *) buf;
 
@@ -86,13 +84,11 @@ void minix_open(const char *name)
 		die("%s: Illegal symbol table", name);
 }
 
-void usage(void)
-{
+void usage(void) {
 	die("Usage: build bootsect system user [> image]");
 }
 
-int main(int argc, char ** argv)
-{
+int main(int argc, char ** argv) {
 	unsigned int i, sz, uz;
 	u32 im_size, sys_size, usr_size;
 	byte major_root, minor_root;

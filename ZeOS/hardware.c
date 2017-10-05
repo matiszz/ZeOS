@@ -6,8 +6,7 @@
 #include <types.h>
 
 extern unsigned int *p_rdtr ;
-DWord get_eflags(void)
-{
+DWord get_eflags(void) {
   register DWord flags;
 __asm__ __volatile__(
   "pushfl\n\t"
@@ -17,39 +16,34 @@ __asm__ __volatile__(
   return flags;
 }
 
-void set_eflags(void)
-{
+void set_eflags(void) {
 __asm__ __volatile__(
   "pushl $0\n\t"
   "popfl" );
 }
 
-void set_idt_reg(Register * idt)
-{
+void set_idt_reg(Register * idt) {
 __asm__ __volatile__(
   "lidtl (%0)"
   : /*no output*/
   : "r" (idt) );
 }
 
-void set_gdt_reg(Register * gdt)
-{
+void set_gdt_reg(Register * gdt) {
 __asm__ __volatile__(
   "lgdtl (%0)"
   : /*no output*/
   : "r" (gdt) );
 }
 
-void set_ldt_reg(Selector ldt)
-{
+void set_ldt_reg(Selector ldt) {
 __asm__ __volatile__(
   "lldtw %0"
   : /*no output*/
   : "r" (ldt) );
 }
 
-void set_task_reg(Selector tr)
-{
+void set_task_reg(Selector tr) {
 __asm__ __volatile__(
   "ltrw %0"
   : /*no output*/
@@ -57,8 +51,7 @@ __asm__ __volatile__(
 }
 
 
-void return_gate(Word ds, Word ss, DWord esp, Word cs, DWord eip)
-{
+void return_gate(Word ds, Word ss, DWord esp, Word cs, DWord eip) {
   __asm__ __volatile__ (
     "mov %0,%%es\n\t"
     "mov %0,%%ds\n\t"
@@ -95,20 +88,18 @@ void return_gate(Word ds, Word ss, DWord esp, Word cs, DWord eip)
  *   x = 1 -> disabled
  */
 
-void enable_int(void)
-{
+void enable_int(void) {
 __asm__ __volatile__(
   "movb %0,%%al\n\t"
   "outb %%al,$0x21\n\t"
   "call delay\n\t"
   "sti"
   : /*no output*/
-  : "i" (0xFD)       /* 0xFF = 11111111 -> all bits disabled */ 
+  : "i" (0xFD)       /* 0xFF = 11111111 -> all bits disabled */
   : "%al" );
 }
 
-void delay(void)
-{
+void delay(void) {
 __asm__ __volatile__(
   "jmp a\na:\t"
   : : );

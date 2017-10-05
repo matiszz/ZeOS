@@ -1,7 +1,4 @@
-/*
- * io.h - Definició de l'entrada/sortida per pantalla en mode sistema
- */
-
+// io.h - Definició de l'entrada/sortida per pantalla en mode sistema
 #ifndef __IO_H__
 #define __IO_H__
 

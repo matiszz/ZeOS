@@ -72,9 +72,17 @@
     // HANDLER DEL TECLADO
 ENTRY(keyboard_handler)
     SAVE_ALL;
+    EOI;
     call keyboard_routine;
     RESTORE_ALL;
+    iret;
+
+    // HANDLER DEL RELOJ
+ENTRY(clock_handler)
+    SAVE_ALL;
     EOI;
+    call clock_routine;
+    RESTORE_ALL;
     iret;
 
     // HANDLER DE SYSTEMM CALLS

@@ -12,8 +12,8 @@ TODO:
  [x] Implementar la llamada a sistema write
 	x - Implementar rutina sys_write
 	x - Modificar sys_call_table con la nueva rutina
-	- Crear wrapper para la llamada a sistema
- [ ] Implementar funciones errno i perror
+	x - Crear wrapper para la llamada a sistema
+ [x] Implementar funciones errno i perror
 
 
 Preguntes profe:

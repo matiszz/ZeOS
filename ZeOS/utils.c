@@ -10,8 +10,8 @@ void copy_data(void *start, void *dest, int size) {
     *q++ = *p++;
     size -= 4;
   }
-  p1=(Byte*)p;
-  q1=(Byte*)q;
+  p1 = (Byte*)p;
+  q1 = (Byte*)q;
   while(size > 0) {
     *q1++ = *p1++;
     size --;
@@ -25,8 +25,8 @@ int copy_from_user(void *start, void *dest, int size) {
     *q++ = *p++;
     size -= 4;
   }
-  p1=(Byte*)p;
-  q1=(Byte*)q;
+  p1 = (Byte*)p;
+  q1 = (Byte*)q;
   while(size > 0) {
     *q1++ = *p1++;
     size --;
@@ -41,8 +41,8 @@ int copy_to_user(void *start, void *dest, int size) {
     *q++ = *p++;
     size -= 4;
   }
-  p1=(Byte*)p;
-  q1=(Byte*)q;
+  p1 = (Byte*)p;
+  q1 = (Byte*)q;
   while(size > 0) {
     *q1++ = *p1++;
     size --;

@@ -2,8 +2,7 @@
 #define STATS_H
 
 /* Structure used by 'get_stats' function */
-struct stats
-{
+struct stats {
   unsigned long user_ticks;
   unsigned long system_ticks;
   unsigned long blocked_ticks;

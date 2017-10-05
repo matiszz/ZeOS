@@ -3,7 +3,6 @@
  */
 
 #include <libc.h>
-
 #include <types.h>
 
 int errno;
@@ -38,6 +37,7 @@ int strlen(char *a) {
 
 void perror() {
   char txt[100];
+  itoa(errno, txt);
   write(1, txt, strlen(txt));
 }
 
@@ -49,15 +49,14 @@ int write(int fd, char *buffer, int size) {
   //   : input operands                   /* optional */
   //   : list of clobbered registers      /* optional */
   //   );
-
-  asm("int $0x80"
-    : "=a" (resultado)
-    : "a" (4), "b" (fd), "c" (buffer), "d" (size)
+  
+  asm("int $0x80"                                   // Instrucción asm
+    : "=a" (resultado)                              // Output (eax = resultado)
+    : "a" (4), "b" (fd), "c" (buffer), "d" (size)   // Inputs
   );
 
-  if (resultado >= 0) {
-    return resultado;
-  } else {
+  if (resultado >= 0) return resultado;
+  else {
     errno = -resultado;
     return -1;
   }

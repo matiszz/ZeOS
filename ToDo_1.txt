@@ -1,0 +1,53 @@
+[x] Download ZeOS
+[x] Install ZeOS
+---
+		tar zxf zeos.tar.gz
+---
+[x] Generate ZeOS. This means generating a 'zeos.bin' file which contains a boot sector, a user code and the code for the operating system.
+---
+		make
+---
+[x] Look at the output of the Makefile, write down how is the Zeos.bin generated, putting for each generated file its dependences.
+[x] Test your OS (without debugger, using 'bochs' binary):
+---
+		make emul
+---
+[x] Test your OS (again) manually:
+---
+		bochs -q
+---
+[ ] Where is ZeOS hanged?
+		- Look the dissassembly of the main function in the 'user' binary which corresponds to the main function in user.c.
+---
+			objdump -d user | less
+---
+		- It shows a listing of address + code
+		- Can you explain what is it doing?
+		- Start the internal debugger (it uses the 'bochs_nogdb' binary)
+---
+			make emuldbg
+---
+			- Start the execution of the image inside the debugger with the 'continue' command (or 'c').
+			- Stop the execution of the emulation with Ctrl-C.
+			- It now shows the next memory address to be loaded in the EIP (next instruction to be executed) and its corresponding value translated to assembly.
+			- Which is this address? match it with the disassembly code shown before.
+
+[ ] Modify the user code, adding a couple of functions 'inner' and 'outer' as explained in the Zeos document (section 2.5.2).
+	Using the debugger you need to learn how to:
+	- Stop the execution of an image at a predefined position: breakpoint ADDRESS
+	- Examine content of the registers: info r
+	- Examine content of the stack: print-stack
+	- Examine content of memory: x ADDRESS
+    - Set/Delete breakpoints: b
+	- Continue the execution of the image until a predefined point: continue
+	- Execute a single assembly instruction: step
+	- Execute a single assembly instruction, but if the instruction is a call, then executes it completely: next
+	[ ] Which is the final value of 'acum'?
+	[ ] Which is the value of 'acum' at the first iteration of 'outer'? Where is it stored? If it is in a register indicate which one, if it is in the stack indicate which address.
+	[ ] Which is the value of 'acum' at the iteration 50 in the 'outer' loop?
+
+[ ] OPTIONAL [ADVANCED]: Try to do the same using the external debugger (GDB)
+
+[ ] Add the function 'add' explained in the Zeos document. Compile it and write down the assembly code of this function.
+[ ] Modify the inner and outer function to use this function.
+[ ] Create an assembler version of the 'add' C function using asembler inline, and test that it works as expected as explained in the Zeos document (section 2.5.3).

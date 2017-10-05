@@ -1,0 +1,21 @@
+TODO:
+
+ [x] Implementar RESTORE_ALL
+ [x] Implementar EOI
+ [x] Implementar keyboard:
+	x - Keyboard service routine
+	x - Keyboard handler
+	x - Inicializar IDT con el handler del keyboard
+	x - Habilitar interrupcion
+ [x] Implementar rutina del system_call_handler
+ [x] Inicializar IDT con el handler
+ [x] Implementar la llamada a sistema write
+	x - Implementar rutina sys_write
+	x - Modificar sys_call_table con la nueva rutina
+	- Crear wrapper para la llamada a sistema
+ [ ] Implementar funciones errno i perror
+
+
+Preguntes profe:
+
+sys_write (sys.c) --> copiar dades al espai de memoria? (pag 32)

@@ -88,11 +88,9 @@ void keyboard_routine() {
 
 	if (make == 0x80) {
     	char c = char_map[translate];
-    	if (c == '\0')
-        	printc_xy(10, 20, 'C');
-      	else
-        	printc_xy(10, 20, c);
-  }
+    	if (c == '\0') printc_xy(10, 20, 'C');
+      	else printc_xy(10, 20, c);
+  	}
 }
 
 

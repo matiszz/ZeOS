@@ -24,10 +24,11 @@ struct task_struct *list_head_to_task_struct(struct list_head *l)
 
 extern struct list_head blocked;
 
+struct list_head freequeue; // tiene que ser global
+
 
 /* get_DIR - Returns the Page Directory address for task 't' */
-page_table_entry * get_DIR (struct task_struct *t) 
-{
+page_table_entry * get_DIR (struct task_struct *t) {
 	return t->dir_pages_baseAddr;
 }
 
@@ -59,28 +60,48 @@ void cpu_idle(void)
 	}
 }
 
-void init_idle (void)
-{
+void init_idle (void) {
+	struct list_head *free; //elemento a sacar
+	free = list_first(&freequeue); //obtenemos el primer elemento de la freequeue;
+	struct task_struct *task;
+	task = *list_head_to_task_struct(&free);
+	/*** aqui hasta el paso 1 pg 47 ***/
+}
+
+void init_task1(void) {
 
 }
 
-void init_task1(void)
-{
+
+void init_sched() {
+
+	/******************** FREE QUEUE ********************/
+	INIT_LIST_HEAD(freequeue); //la inicializamos
+	
+	struct list_head primer; //declaramos un auxiliar
+	primer = *freequeue;
+
+	for (int i = 0; i < 10; ++i) {
+		struct task_struct tmp; //declaramos un task_struct vacio
+		list_add(tmp->list,primer); //añadimos el list del task_struct vacio despues de primer
+		primer = tmp->list; //el añadido pasa a ser primer
+	}
+	/******************** FREE QUEUE ********************/
+
+	/******************** READY QUEUE *******************/
+	struct list_head *readyqueue; //declaramos una readyqueue
+	INIT_LIST_HEAD(readyqueue); //la inicializamos
+		/******************** READY QUEUE *******************/
+
 }
 
-
-void init_sched(){
-
-}
-
-struct task_struct* current()
-{
+struct task_struct* current() {
   int ret_value;
   
   __asm__ __volatile__(
   	"movl %%esp, %0"
 	: "=g" (ret_value)
   );
+
   return (struct task_struct*)(ret_value&0xfffff000);
 }
-

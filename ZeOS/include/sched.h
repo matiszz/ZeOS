@@ -9,7 +9,7 @@
 #include <types.h>
 #include <mm_address.h>
 
-#define NR_TASKS      10
+#define NR_TASKS      		10
 #define KERNEL_STACK_SIZE	1024
 
 enum state_t { ST_RUN, ST_READY, ST_BLOCKED };
@@ -17,6 +17,7 @@ enum state_t { ST_RUN, ST_READY, ST_BLOCKED };
 struct task_struct {
   int PID;			/* Process ID. This MUST be the first field of the struct. */
   page_table_entry * dir_pages_baseAddr;
+  struct list_head list; /* se utiliza para encolarse a si mismo */
 };
 
 union task_union {
@@ -24,21 +25,24 @@ union task_union {
   unsigned long stack[KERNEL_STACK_SIZE];    /* pila de sistema, per procés */
 };
 
+extern struct list_head freequeue; /* declaracion y inicializacion de la free queue */
+extern struct list_head readyqueue; /* declaracion y inicializacion de la ready queue */
+
 extern union task_union protected_tasks[NR_TASKS+2];
 extern union task_union *task; /* Vector de tasques */
 extern struct task_struct *idle_task;
 
 
-#define KERNEL_ESP(t)       	(DWord) &(t)->stack[KERNEL_STACK_SIZE]
+#define KERNEL_ESP(t)       (DWord) &(t)->stack[KERNEL_STACK_SIZE]
 
 #define INITIAL_ESP       	KERNEL_ESP(&task[1])
 
 /* Inicialitza les dades del proces inicial */
-void init_task1(void);
+void init_task1(void); /* inicializa y crea el proceso init */
 
-void init_idle(void);
+void init_idle(void); /* inicializa y crea el proceso idle */
 
-void init_sched(void);
+void init_sched(void); /*inicializa la freequeue y la readyqueue*/
 
 struct task_struct * current();
 

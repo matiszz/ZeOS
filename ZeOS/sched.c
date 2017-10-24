@@ -15,14 +15,14 @@ union task_union protected_tasks[NR_TASKS+2]
 
 union task_union *task = &protected_tasks[1]; /* == union task_union task[NR_TASKS] */
 
-#if 0
-struct task_struct *list_head_to_task_struct(struct list_head *l)
-{
-  return list_entry( l, struct task_struct, list);
+
+struct task_struct *list_head_to_task_struct(struct list_head *l) {
+  	return (unsigned long) l & (0xfffff000);
 }
-#endif
 
 extern struct list_head blocked;
+extern struct task_struct *idle_task; 
+
 
 struct list_head freequeue; // tiene que ser global
 
@@ -63,28 +63,47 @@ void cpu_idle(void)
 void init_idle (void) {
 	struct list_head *free; //elemento a sacar
 	free = list_first(&freequeue); //obtenemos el primer elemento de la freequeue;
-	struct task_struct *task;
-	task = *list_head_to_task_struct(&free);
-	/*** aqui hasta el paso 1 pg 47 ***/
+	struct task_struct *pcb_idle;
+	pcb_idle = list_head_to_task_struct(free); //a partir del list_head sacamos el task_struct
+	pcb_idle->PID = 0; //asignamos el PID 0 al proceso 
+	allocate_DIR(pcb_idle); //inicializamos el directorio de paginas del proceso task
+
+	union task_union *uIdle;
+	uIdle->task = *(pcb_idle);
+	uIdle->stack[1023] = &cpu_idle; //asignamos la direccion de la funcion cpu_idle, ojo parentesis
+	uIdle->stack[1022] = 0; //ebp = 0
+	KERNEL_ESP(uIdle); // Hacemos que el Kernel_ESP apunte a la cima de la pila del contexto idle
+	struct task_struct *idle_task = pcb_idle;
 }
 
 void init_task1(void) {
+	struct list_head *free; //elemento a sacar
+	free = list_first(&freequeue); //obtenemos el primer elemento de la freequeue;
+	struct task_struct *pcb_init;
+	pcb_init = list_head_to_task_struct(free); //a partir del list_head sacamos el task_struct
+	pcb_init->PID = 1; //asignamos el PID 1 al proceso 
+	allocate_DIR(pcb_init); //inicializamos el directorio de paginas del proceso task
+	set_user_pages(pcb_init);
 
+	union task_union *uInit;
+	uInit->task = *(pcb_init);
+	tss.esp0 = uInit->stack[1023];
+	set_cr3(pcb_init->dir_pages_baseAddr);
 }
 
 
 void init_sched() {
 
 	/******************** FREE QUEUE ********************/
-	INIT_LIST_HEAD(freequeue); //la inicializamos
+	INIT_LIST_HEAD(&freequeue); //la inicializamos
 	
 	struct list_head primer; //declaramos un auxiliar
-	primer = *freequeue;
+	primer = freequeue;
 
 	for (int i = 0; i < 10; ++i) {
 		struct task_struct tmp; //declaramos un task_struct vacio
-		list_add(tmp->list,primer); //añadimos el list del task_struct vacio despues de primer
-		primer = tmp->list; //el añadido pasa a ser primer
+		list_add(&(tmp.list), &primer); //añadimos el list del task_struct vacio despues de primer
+		primer = tmp.list; //el añadido pasa a ser primer
 	}
 	/******************** FREE QUEUE ********************/
 

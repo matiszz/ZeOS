@@ -9,5 +9,3 @@
 [ ] Implement process scheduling.
 [ ] Implement the exit system call.
 [ ] Implement the getstats system call.
-
-

@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "zeos_interrupt.h": "c",
-        "system.h": "c",
-        "schedperf.h": "c",
-        "libc.h": "c"
-    }
-}

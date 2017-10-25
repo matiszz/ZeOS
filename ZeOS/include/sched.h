@@ -1,6 +1,6 @@
 /*
- * sched.h - Estructures i macros pel tractament de processos
- */
+* sched.h - Estructures i macros pel tractament de processos
+*/
 
 #ifndef __SCHED_H__
 #define __SCHED_H__
@@ -15,21 +15,22 @@
 enum state_t { ST_RUN, ST_READY, ST_BLOCKED };
 
 struct task_struct {
-  int PID;			/* Process ID. This MUST be the first field of the struct. */
-  page_table_entry * dir_pages_baseAddr;
-  struct list_head list; /* se utiliza para encolarse a si mismo */
+	int PID;					// Process ID. This MUST be the first field of the struct.
+	page_table_entry * dir_pages_baseAddr;
+	struct list_head list; 		// Se utiliza para encolarse a si mismo
+	int esp;
 };
 
 union task_union {
-  struct task_struct task;
-  unsigned long stack[KERNEL_STACK_SIZE];    /* pila de sistema, per procés */
+	struct task_struct task;
+	unsigned long stack[KERNEL_STACK_SIZE];    // pila de sistema, per procés
 };
 
-extern struct list_head freequeue; /* declaracion y inicializacion de la free queue */
-extern struct list_head readyqueue; /* declaracion y inicializacion de la ready queue */
+extern struct list_head freequeue; 	// Declaración e inicializacion de la free queue
+extern struct list_head readyqueue; // Declaración e inicializacion de la ready queue
 
 extern union task_union protected_tasks[NR_TASKS+2];
-extern union task_union *task; /* Vector de tasques */
+extern union task_union *task;      // Vector de tasques
 extern struct task_struct *idle_task; 
 
 
@@ -38,11 +39,11 @@ extern struct task_struct *idle_task;
 #define INITIAL_ESP       	KERNEL_ESP(&task[1])
 
 /* Inicialitza les dades del proces inicial */
-void init_task1(void); /* inicializa y crea el proceso init */
+void init_task1(void);  // Inicializa y crea el proceso init
 
-void init_idle(void); /* inicializa y crea el proceso idle */
+void init_idle(void);   // Inicializa y crea el proceso idle
 
-void init_sched(void); /*inicializa la freequeue y la readyqueue*/
+void init_sched(void);  // Inicializa la freequeue y la readyqueue
 
 struct task_struct * current();
 

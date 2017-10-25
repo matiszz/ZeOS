@@ -40,9 +40,9 @@ void sys_exit() {
 int sys_write(int fd, char * buffer, int size) {
 	int res;
 
-	if (res = check_fd(fd, ESCRIPTURA) < 0) return -1;  // Comprova fd
-	if (buffer == NULL) return -1;						// Comprova buffer
-	if (size < 0) return -1;							// Comprova mida
+	if ((res = check_fd(fd, ESCRIPTURA)) < 0) return -1;  	// Comprova fd
+	if (buffer == NULL) return -1;							// Comprova buffer
+	if (size < 0) return -1;								// Comprova mida
 
 	return sys_write_console(buffer, size);
 }

@@ -71,7 +71,7 @@ main(void) {
     /*** DO *NOT* ADD ANY CODE IN THIS ROUTINE BEFORE THIS POINT ***/
 
     printk("Kernel Loaded!    ");
-    extern zeos_ticks; // Extern la llama de fuera.
+    extern int zeos_ticks; // Extern la llama de fuera.
     zeos_ticks = 0;
 
     /* Initialize hardware data */
@@ -84,7 +84,7 @@ main(void) {
 
     /* Initialize an address space to be used for the monoprocess version of ZeOS */
 
-    monoprocess_init_addr_space(); /* TO BE DELETED WHEN ADDED THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS */
+    //monoprocess_init_addr_space(); /* TO BE DELETED WHEN ADDED THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS */
 
     /* Initialize Scheduling */
     init_sched();

@@ -20,8 +20,8 @@ extern struct task_struct *idle_task;
 struct list_head freequeue; 				  // Tiene que ser global
 
 struct task_struct *list_head_to_task_struct(struct list_head *l) {
-	return (unsigned long)l & (0xfffff000);
-	//return (struct task_struct*)l; ??
+	// return (unsigned long)l & (0xfffff000);
+	return (struct task_struct*)l;// ??
 }
 
 /* get_DIR - Returns the Page Directory address for task 't' */
@@ -36,7 +36,7 @@ page_table_entry * get_PT (struct task_struct *t) {
 
 void inner_task_switch(union task_union *new) {
 	// Cambio pila de sistema.
-	tss.esp0 = &(new->stack[KERNEL_STACK_SIZE]);
+	tss.esp0 = (unsigned long)&(new->stack[KERNEL_STACK_SIZE]);
 
 	// Cambio de Tabla de Páginas
 	set_cr3(new->task.dir_pages_baseAddr);
@@ -56,11 +56,11 @@ void inner_task_switch(union task_union *new) {
 	asm volatile("ret;");
 }
 
-void task_switch(union task_union *new) {
+void task_switch(union task_union *t) {
 	asm("push %esi;");
 	asm("push %edi;");
 	asm("push %ebx;");
-	inner_task_switch(new);
+	inner_task_switch(t);
 	asm("pop %ebx;");
 	asm("pop %edi;");
 	asm("pop %esi;");
@@ -91,11 +91,12 @@ void init_idle (void) {
 
 	union task_union *uIdle;
 	uIdle->task = *(pcb_idle);
-	uIdle->stack[1023] = &cpu_idle; // Asignamos la direccion de la funcion cpu_idle
+	uIdle->stack[1023] = (unsigned long)&cpu_idle; // Asignamos la direccion de la funcion cpu_idle
 	uIdle->stack[1022] = 0; 		// %ebp = 0
 	KERNEL_ESP(uIdle); 				// Hacemos que el Kernel_ESP apunte a la cima de la pila del contexto idle
 	
 	struct task_struct *idle_task = pcb_idle; // Hacemos que la variable global aputne al PCB de idle
+	idle_task = idle_task; // Para que el complilador no se queje
 }
 
 void init_task1(void) {
@@ -110,7 +111,7 @@ void init_task1(void) {
 	
 	union task_union *uInit = (union task_union*)pcb_init; // ??
 	uInit->task = *(pcb_init);
-	tss.esp0 = (DWord)&(uInit->stack[KERNEL_STACK_SIZE]); // = uInit->stack[1023]; ??
+	tss.esp0 = (unsigned long)&(uInit->stack[KERNEL_STACK_SIZE]); // = uInit->stack[1023]; ??
 
 	set_cr3(pcb_init->dir_pages_baseAddr);	// Hacemos que cr3 apunte a su directorio
 }

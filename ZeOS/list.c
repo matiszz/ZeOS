@@ -3,8 +3,7 @@
 /* 
  * Initializes an empty list.
  */
-void INIT_LIST_HEAD(struct list_head *list)
-{
+void INIT_LIST_HEAD(struct list_head *list) {
 	list->next = list;
 	list->prev = list;
 }

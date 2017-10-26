@@ -18,10 +18,13 @@ union task_union *task = &protected_tasks[1]; // == union task_union task[NR_TAS
 extern struct list_head blocked;
 extern struct task_struct *idle_task; 
 struct list_head freequeue; 				  // Tiene que ser global
+struct list_head readyqueue; 				  // Tiene que ser global
 
 struct task_struct *list_head_to_task_struct(struct list_head *l) {
-	// return (unsigned long)l & (0xfffff000);
-	return (struct task_struct*)l;// ??
+	unsigned long aux = (unsigned long)l;
+	unsigned long aux2 = aux&0xfffff000;
+	return (struct task_struct *)aux2;
+	//return (struct task_struct*)l;// ??
 }
 
 /* get_DIR - Returns the Page Directory address for task 't' */
@@ -89,7 +92,7 @@ void init_idle (void) {
 
 	allocate_DIR(pcb_idle); 	// Inicializamos el directorio de paginas del proceso task
 
-	union task_union *uIdle;
+	union task_union *uIdle = (union task_union*)pcb_idle;
 	uIdle->task = *(pcb_idle);
 	uIdle->stack[1023] = (unsigned long)&cpu_idle; // Asignamos la direccion de la funcion cpu_idle
 	uIdle->stack[1022] = 0; 		// %ebp = 0
@@ -111,7 +114,7 @@ void init_task1(void) {
 	
 	union task_union *uInit = (union task_union*)pcb_init; // ??
 	uInit->task = *(pcb_init);
-	tss.esp0 = (unsigned long)&(uInit->stack[KERNEL_STACK_SIZE]); // = uInit->stack[1023]; ??
+	tss.esp0 = (DWord)&(uInit->stack[KERNEL_STACK_SIZE]); // = uInit->stack[1023]; ??
 
 	set_cr3(pcb_init->dir_pages_baseAddr);	// Hacemos que cr3 apunte a su directorio
 }
@@ -132,8 +135,7 @@ void init_sched() {
 	/******************** FREE QUEUE ********************/
 
 	/******************** READY QUEUE *******************/
-	struct list_head *readyqueue; 	// Declaramos una readyqueue
-	INIT_LIST_HEAD(readyqueue); 	// La inicializamos
+	INIT_LIST_HEAD(&readyqueue); 	// La inicializamos
 	/******************** READY QUEUE *******************/
 }
 

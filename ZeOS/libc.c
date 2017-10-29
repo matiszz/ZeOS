@@ -6,6 +6,8 @@
 #include <types.h>
 
 int errno;
+
+// Convierte int a sring
 void itoa(int a, char *b) {
 	int i, i1;
 	char c;
@@ -42,16 +44,9 @@ void perror() {
 
 int write(int fd, char *buffer, int size) {
 	int resultado;
-
-	// asm ( assembler template 
-	//   : output operands                  /* optional */
-	//   : input operands                   /* optional */
-	//   : list of clobbered registers      /* optional */
-	//   );
-	
-	asm ( "int $0x80"                                	// Instrucción asm
-		: "=a" (resultado)                              // Output (eax = resultado)
-		: "a" (4), "b" (fd), "c" (buffer), "d" (size)   // Inputs
+	asm ( "int $0x80"
+		: "=a" (resultado)
+		: "a" (4), "b" (fd), "c" (buffer), "d" (size)
 	);
 
 	if (resultado >= 0) return resultado;
@@ -67,6 +62,21 @@ int gettime() {
 		: "=a" (resultado)
 		: "a" (10)
 	);
+
+	if (resultado >= 0) return resultado;
+	else {
+		errno = -resultado;
+		return -1;
+	}
+}
+
+int getpid() {
+	int resultado;
+	asm ( "int $0x80"
+		: "=a" (resultado)
+		: "a" (20)
+	);
+
 	if (resultado >= 0) return resultado;
 	else {
 		errno = -resultado;

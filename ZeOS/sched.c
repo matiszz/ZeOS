@@ -24,7 +24,6 @@ struct task_struct *list_head_to_task_struct(struct list_head *l) {
 	unsigned long aux = (unsigned long)l;
 	unsigned long aux2 = aux&0xfffff000;
 	return (struct task_struct *)aux2;
-	//return (struct task_struct*)l;// ??
 }
 
 /* get_DIR - Returns the Page Directory address for task 't' */
@@ -112,9 +111,9 @@ void init_task1(void) {
 	allocate_DIR(pcb_init); 	// Inicializamos el directorio de paginas del proceso task1
 	set_user_pages(pcb_init);
 	
-	union task_union *uInit = (union task_union*)pcb_init; // ??
+	union task_union *uInit = (union task_union*)pcb_init;
 	uInit->task = *(pcb_init);
-	tss.esp0 = (DWord)&(uInit->stack[KERNEL_STACK_SIZE]); // = uInit->stack[1023]; ??
+	tss.esp0 = (DWord)&(uInit->stack[KERNEL_STACK_SIZE]);
 
 	set_cr3(pcb_init->dir_pages_baseAddr);	// Hacemos que cr3 apunte a su directorio
 }

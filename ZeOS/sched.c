@@ -37,14 +37,14 @@ page_table_entry * get_PT (struct task_struct *t) {
 	return (page_table_entry *)(((unsigned int)(t->dir_pages_baseAddr->bits.pbase_addr))<<12);
 }
 
-void inner_task_switch(union task_union *new) {
+void inner_task_switch(union task_union *nuevo) {
 	// Cambio pila de sistema.
-	tss.esp0 = (unsigned long)&(new->stack[KERNEL_STACK_SIZE]);
+	tss.esp0 = (unsigned long)&(nuevo->stack[KERNEL_STACK_SIZE]);
 
 	// Cambio de Tabla de Páginas
-	set_cr3(new->task.dir_pages_baseAddr);
+	set_cr3(nuevo->task.dir_pages_baseAddr);
 
-	// Guardamos en ebp el esp de new
+	// Guardamos en ebp el esp de nuevo
 	asm volatile("movl %%ebp, %0" /* %0 es el input */
 		: "=g" (current()->esp)
 	);
@@ -52,7 +52,7 @@ void inner_task_switch(union task_union *new) {
 	// Guardamos el contenido de esp en el esp de mi pila
 	asm volatile("movl %0, %%esp"
 		: /* No input */
-		: "g" (new->task.esp)
+		: "g" (nuevo->task.esp)
 	);
 	// Salir del modo sistema
 	asm volatile("pop %ebp;");
@@ -121,22 +121,13 @@ void init_task1(void) {
 
 void init_sched() {
 
-	/******************** FREE QUEUE ********************/
-	INIT_LIST_HEAD(&freequeue); // La inicializamos
-	
-	struct list_head primer; 	// Declaramos un auxiliar
-	primer = freequeue;
+	/// FREE QUEUE
+	INIT_LIST_HEAD(&freequeue); 	// La inicializamos
+	for (int i = 0; i < NR_TASKS; ++i)
+		list_add_tail(&(task[i].task.list), &freequeue); // Añadimos las tareas al principio
 
-	for (int i = 0; i < 10; ++i) {
-		struct task_struct tmp;	// Declaramos un task_struct vacio
-		list_add(&(tmp.list), &primer); // Añadimos el list del task_struct vacio despues de primer
-		primer = tmp.list; 		// El añadido pasa a ser primer
-	}
-	/******************** FREE QUEUE ********************/
-
-	/******************** READY QUEUE *******************/
+	// READY QUEUE
 	INIT_LIST_HEAD(&readyqueue); 	// La inicializamos
-	/******************** READY QUEUE *******************/
 }
 
 struct task_struct* current() {

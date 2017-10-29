@@ -23,7 +23,7 @@ struct task_struct {
 
 union task_union {
 	struct task_struct task;
-	unsigned long stack[KERNEL_STACK_SIZE];    // pila de sistema, per procés
+	unsigned long stack[KERNEL_STACK_SIZE];    // Pila de sistema, per procés
 };
 
 extern struct list_head freequeue; 	// Declaración e inicializacion de la free queue

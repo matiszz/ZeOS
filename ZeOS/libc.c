@@ -83,3 +83,17 @@ int getpid() {
 		return -1;
 	}
 }
+
+int fork() {
+	int resultado;
+	asm ( "int $0x80"
+		: "=a" (resultado)
+		: "a" (2)
+	);
+
+	if (resultado >= 0) return resultado;
+	else {
+		errno = -resultado;
+		return -1;
+	}
+}

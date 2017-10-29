@@ -29,7 +29,7 @@ int sys_getpid() {
 
 void libera_pags(int paginas[NUM_PAG_DATA]) {
 	int acabat = 0;
-	for (int i = 0; i < NUM_PAG_DATA && acabat != 0; ++i) {
+	for (int i = 0; i < NUM_PAG_DATA && acabat != 1; ++i) {
 		if (paginas[i] != -5) free_frame(paginas[i]);
 		else acabat = 1;
 	}

@@ -84,29 +84,29 @@ void cpu_idle(void) {
 
 void init_idle (void) {
 	struct list_head *primer = list_first(&freequeue); // Obtenemos el primer elemento de la freequeue;
-	list_del(primer); 			// Eliminamos este elemento
-
+	
 	struct task_struct *pcb_idle = list_head_to_task_struct(primer); // A partir del list_head sacamos el task_struct
+	list_del(primer); 			// Eliminamos este elemento
 	pcb_idle->PID = 0; 			// Asignamos el PID 0 al proceso
-
+	
 	allocate_DIR(pcb_idle); 	// Inicializamos el directorio de paginas del proceso task
 
 	union task_union *uIdle = (union task_union*)pcb_idle;
 	uIdle->task = *(pcb_idle);
-	uIdle->stack[1023] = (unsigned long)&cpu_idle; // Asignamos la direccion de la funcion cpu_idle
-	uIdle->stack[1022] = 0; 		// %ebp = 0
+	uIdle->stack[KERNEL_STACK_SIZE-1] = (unsigned long)&cpu_idle; // Asignamos la direccion de la funcion cpu_idle
+	uIdle->stack[KERNEL_STACK_SIZE-2] = 0; 		// %ebp = 0
 	//KERNEL_ESP(uIdle); 				// Hacemos que el Kernel_ESP apunte a la cima de la pila del contexto idle
-	pcb_idle->esp = (unsigned long)&(uIdle->stack[1022]);
+	pcb_idle->esp = (unsigned long)&(uIdle->stack[KERNEL_STACK_SIZE-2]);
 
-	struct task_struct *idle_task = pcb_idle; // Hacemos que la variable global aputne al PCB de idle
-	idle_task = idle_task; // Para que el complilador no se queje
+	idle_task = pcb_idle; // Hacemos que la variable global aputne al PCB de idle
+	//idle_task = idle_task; // Para que el complilador no se queje
 }
 
 void init_task1(void) {
 	struct list_head *primer = list_first(&freequeue); // Obtenemos el primer elemento de la freequeue;
-	list_del(primer);			// Lo eliminamos
-
+	
 	struct task_struct *pcb_init = list_head_to_task_struct(primer); // A partir del list_head sacamos el task_struct
+	list_del(primer);			// Lo eliminamos
 	pcb_init->PID = 1; 			// Asignamos el PID 1 al proceso 
 	
 	allocate_DIR(pcb_init); 	// Inicializamos el directorio de paginas del proceso task1

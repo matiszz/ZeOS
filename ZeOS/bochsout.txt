@@ -31,12 +31,12 @@
 00000000000i[     ]   SB16 support: no
 00000000000i[     ]   USB support: no
 00000000000i[     ]   VGA extension support:  
-00000000000i[MEM0 ] allocated memory at 0x7f91009a6010. after alignment, vector=0x7f91009a7000
+00000000000i[MEM0 ] allocated memory at 0x7f0a74b17010. after alignment, vector=0x7f0a74b18000
 00000000000i[MEM0 ] 16.00MB
 00000000000i[MEM0 ] rom at 0xffff0000/65536 ('/usr/local/share/bochs/BIOS-bochs-latest')
 00000000000i[MEM0 ] rom at 0xc0000/38400 ('/usr/local/share/bochs/VGABIOS-lgpl-latest')
 00000000000i[CMOS ] Using local time for initial clock
-00000000000i[CMOS ] Setting initial clock to: Tue Oct 31 17:05:04 2017 (time0=1509465904)
+00000000000i[CMOS ] Setting initial clock to: Tue Oct 31 20:12:03 2017 (time0=1509477123)
 00000000000i[DMA  ] channel 4 used by cascade
 00000000000i[DMA  ] channel 2 used by Floppy Drive
 00000000000i[FDD  ] fd0: './zeos.bin' ro=0, h=2,t=80,spt=18
@@ -113,26 +113,3 @@
 00009595674i[FDD  ] read() on floppy image returns 0
 00009618407i[FDD  ] read() on floppy image returns 0
 00009641140i[FDD  ] read() on floppy image returns 0
-00790490000p[XGUI ] >>PANIC<< POWER button turned off.
-00790490000i[SYS  ] Last time is 1509466299
-00790490000i[XGUI ] Exit.
-00790490000i[CPU  ] protected mode
-00790490000i[CPU  ] CS.d_b = 32 bit
-00790490000i[CPU  ] SS.d_b = 32 bit
-00790490000i[CPU  ] | EAX=00000000  EBX=00000000  ECX=00000015  EDX=0000000a
-00790490000i[CPU  ] | ESP=00016f0c  EBP=00016f14  ESI=00000200  EDI=00003ff4
-00790490000i[CPU  ] | IOPL=0 id vip vif ac vm rf nt of df if tf sf zf af PF cf
-00790490000i[CPU  ] | SEG selector     base    limit G D
-00790490000i[CPU  ] | SEG sltr(index|ti|rpl)     base    limit G D
-00790490000i[CPU  ] |  CS:0010( 0002| 0|  0) 00000000 000fffff 1 1
-00790490000i[CPU  ] |  DS:0018( 0003| 0|  0) 00000000 000fffff 1 1
-00790490000i[CPU  ] |  SS:0018( 0003| 0|  0) 00000000 000fffff 1 1
-00790490000i[CPU  ] |  ES:0018( 0003| 0|  0) 00000000 000fffff 1 1
-00790490000i[CPU  ] |  FS:0000( 0000| 0|  0) 00000000 000fffff 1 1
-00790490000i[CPU  ] |  GS:0000( 0000| 0|  0) 00000000 000fffff 1 1
-00790490000i[CPU  ] | EIP=000116c3 (000116c3)
-00790490000i[CPU  ] | CR0=0x80000011 CR1=0 CR2=0x00000004
-00790490000i[CPU  ] | CR3=0x0002b000 CR4=0x00000000
-00790490000i[CPU  ] >> jmp .+0xfffffffe (0x000116c3) : EBFE
-00790490000i[     ] restoring default signal behavior
-00790490000i[CTRL ] quit_sim called with exit code 1

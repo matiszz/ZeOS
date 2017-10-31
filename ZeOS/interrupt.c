@@ -86,7 +86,6 @@ void keyboard_routine() {
 
   	unsigned char translate = key & 0x7F; // Per saber el codi
   	unsigned char make = key & 0x80;		// Per saber si break o make
-
 	if (make == 0x80) {
     	char c = char_map[translate];
     	if (c == '\0') printc_xy(10, 20, 'C');
@@ -96,13 +95,12 @@ void keyboard_routine() {
 
 
 	// Rutina del clock
-extern int zeos_ticks; // Extern la llama de fuera.
 struct task_struct *idle_task;
-
+extern int zeos_ticks; // Extern la llama de fuera.
 void clock_routine() {
 	zeos_show_clock();
 	zeos_ticks++;
-	if (zeos_ticks == 40) task_switch((union task_union *)idle_task);
+	if (zeos_ticks >= 40) task_switch((union task_union *) idle_task);
 }
 
 void keyboard_handler();

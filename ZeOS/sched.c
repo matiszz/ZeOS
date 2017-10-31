@@ -13,7 +13,7 @@
 union task_union protected_tasks[NR_TASKS+2]
   __attribute__((__section__(".data.task")));
 
-union task_union *task = &protected_tasks[1]; // == union task_union task[NR_TASKS] ??
+union task_union *task = &protected_tasks[1];
 
 extern struct list_head blocked;
 extern struct task_struct *idle_task; 
@@ -95,8 +95,9 @@ void init_idle (void) {
 	uIdle->task = *(pcb_idle);
 	uIdle->stack[1023] = (unsigned long)&cpu_idle; // Asignamos la direccion de la funcion cpu_idle
 	uIdle->stack[1022] = 0; 		// %ebp = 0
-	KERNEL_ESP(uIdle); 				// Hacemos que el Kernel_ESP apunte a la cima de la pila del contexto idle
-	
+	//KERNEL_ESP(uIdle); 				// Hacemos que el Kernel_ESP apunte a la cima de la pila del contexto idle
+	pcb_idle->esp = (unsigned long)&(uIdle->stack[1022]);
+
 	struct task_struct *idle_task = pcb_idle; // Hacemos que la variable global aputne al PCB de idle
 	idle_task = idle_task; // Para que el complilador no se queje
 }

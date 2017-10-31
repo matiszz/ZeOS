@@ -10,6 +10,7 @@
 
 #define LECTURA 0
 #define ESCRIPTURA 1
+int lastPID = 3;
 
 int zeos_ticks;
 
@@ -39,14 +40,18 @@ int random_pid() {
 	return zeos_ticks%100;
 }
 
+int ret_from_fork() {
+	return 0;
+}
+
 int sys_fork() {
 	int PID = -1;
 
 	if (list_empty(&freequeue)) return -1;
 	// Cogemos el primer PCB, lo liberamos y se lo asignamos al hijo.
-	struct task_head *primer = list_first(&freequeue);
+	struct list_head *primer = list_first(&freequeue);
 	list_del(primer);
-	struct task_struct *pcb_hijo = list_head_to_task_struct(&primer);
+	struct task_struct *pcb_hijo = list_head_to_task_struct(primer);
 
 	// Creamos los dos tasks_union para poder copiar el del padre en el del hijo.
 	union task_union *uHijo = (union task_union*)pcb_hijo;
@@ -56,7 +61,7 @@ int sys_fork() {
 	// Inicializar el Directorio de páginas del hijo
 	allocate_DIR(pcb_hijo);
 
-	// Comprobar si hay suficiente espacio. Vector ??
+	// Comprobar si hay suficiente espacio
 	int fisicas[NUM_PAG_DATA];
 	for (int i = 0; i < NUM_PAG_DATA; ++i) fisicas[i] = -5; // Pongo todos los valores a -5 
 	for (int i = 0; i < NUM_PAG_DATA; ++i) { // Veo si hay espacio suficiente
@@ -89,21 +94,29 @@ int sys_fork() {
 		// Debería comprobar que no hay nada ?? que no me vaya de rango y tal
 		int logica_tmp = PAG_LOG_INIT_DATA+NUM_PAG_DATA+i;
 		set_ss_pag(TP_padre, logica_tmp, fisicas[i]);
-		copy_data(NUM_PAG_DATA+i, fisicas[i], PAGE_SIZE);
+
+		unsigned int numFrame = get_frame(TP_padre, PAG_LOG_INIT_DATA+i);
+
+		copy_data(&(numFrame), &(fisicas[i]), PAGE_SIZE);
 		del_ss_pag(TP_padre, logica_tmp);
 	}
 	// - Por último, hacemos flush del TLB
 	set_cr3(current()->dir_pages_baseAddr);
 
 	// Comprobamos que el PID no existe y lo asignamos
-	PID = random_pid();
-	extern union task_union *task;
-	for (int i = 0; i < NR_TASKS; ++i) {
-		if (task[i].task.PID == PID) { PID = random_pid(); i = 0; }
-	}
+	PID = lastPID;
+	++lastPID;
 
 	// Cambiamos los parámetros que son propios del hijo
-	// Cuales son los campos que hay que cambiar ??
+	
+
+	// Hacer ret_from_fork
+	uHijo->stack[KERNEL_STACK_SIZE-18] = (unsigned long)&ret_from_fork; //preparar la pila del hijo con lo que se espera el task_switch
+	uHijo->stack[KERNEL_STACK_SIZE-19] = 0;
+
+	pcb_hijo->esp = (int)&(uHijo->stack[KERNEL_STACK_SIZE-19]);
+
+	list_add_tail(&(pcb_hijo->list), &readyqueue);
 
 	return PID;
 }

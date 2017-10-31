@@ -27,12 +27,16 @@ int sys_getpid() {
 	return current()->PID;
 }
 
-void libera_pags(int paginas[NUM_PAG_DATA]) {
+void libera_frames(int fisicas[NUM_PAG_DATA]) {
 	int acabat = 0;
 	for (int i = 0; i < NUM_PAG_DATA && acabat != 1; ++i) {
-		if (paginas[i] != -5) free_frame(paginas[i]);
+		if (fisicas[i] != -5) free_frame(fisicas[i]);
 		else acabat = 1;
 	}
+}
+
+int random_pid() {
+	return zeos_ticks%100;
 }
 
 int sys_fork() {
@@ -42,29 +46,64 @@ int sys_fork() {
 	// Cogemos el primer PCB, lo liberamos y se lo asignamos al hijo.
 	struct task_head *primer = list_first(&freequeue);
 	list_del(primer);
-	struct task_struct *pcb_hijo = list_head_to_task_struct(primer);
+	struct task_struct *pcb_hijo = list_head_to_task_struct(&primer);
 
 	// Creamos los dos tasks_union para poder copiar el del padre en el del hijo.
 	union task_union *uHijo = (union task_union*)pcb_hijo;
 	union task_union *uPadre = (union task_union*)current();
 	copy_data(uPadre, uHijo, sizeof(union task_union));
 
-	// Inicializar el dir_pages_baseAddr. Set_cr3 ??
+	// Inicializar el Directorio de páginas del hijo
 	allocate_DIR(pcb_hijo);
 
 	// Comprobar si hay suficiente espacio. Vector ??
-	int paginas[NUM_PAG_DATA];
-		// Pongo todos los valores a -5
-	for (int i = 0; i < NUM_PAG_DATA; ++i) paginas[i] = -5;
-		// Veo si hay espacio suficiente
-	for (int i = 0; i < NUM_PAG_DATA; ++i) {
+	int fisicas[NUM_PAG_DATA];
+	for (int i = 0; i < NUM_PAG_DATA; ++i) fisicas[i] = -5; // Pongo todos los valores a -5 
+	for (int i = 0; i < NUM_PAG_DATA; ++i) { // Veo si hay espacio suficiente
 		int num_pag = alloc_frame();
-		paginas[i] = num_pag;
+		fisicas[i] = num_pag;
 		if (num_pag < 0) {
-			libera_pags(paginas);
+			libera_frames(fisicas);
 			return -1;
 		}
 	}
+
+	// Copiar la pila del padre en el hijo
+	page_table_entry * TP_padre = get_PT(current());
+	page_table_entry * TP_hijo = get_PT(pcb_hijo);
+	// - Primero tenemos que hacer que Kernel y Code de hijo apunten a frames del padre
+	for (int i = 0; i < NUM_PAG_KERNEL+NUM_PAG_CODE; ++i) {
+		unsigned int fisica = get_frame(TP_padre, i);
+		set_ss_pag(TP_hijo, i, fisica);
+	}
+	// - Ahora tengo que crear nuevas páginas para data, a partir de code
+	for (int i = 0; i < NUM_PAG_DATA; ++i) {
+		set_ss_pag(TP_hijo, PAG_LOG_INIT_DATA+i, fisicas[i]);
+	}
+
+	// Copiar el contenido de Data del padre al hijo
+	// - Primero tenemos que buscar entradas temporales de la TP del padre para apuntar a las del hijo
+	// - Luego copiamos los datos desde el frame del padre hasta el del hijo
+	// - Finalmente eliminamos la entrada temporal
+	for (int i = 0; i < NUM_PAG_DATA; ++i) {
+		// Debería comprobar que no hay nada ?? que no me vaya de rango y tal
+		int logica_tmp = PAG_LOG_INIT_DATA+NUM_PAG_DATA+i;
+		set_ss_pag(TP_padre, logica_tmp, fisicas[i]);
+		copy_data(NUM_PAG_DATA+i, fisicas[i], PAGE_SIZE);
+		del_ss_pag(TP_padre, logica_tmp);
+	}
+	// - Por último, hacemos flush del TLB
+	set_cr3(current()->dir_pages_baseAddr);
+
+	// Comprobamos que el PID no existe y lo asignamos
+	PID = random_pid();
+	extern union task_union *task;
+	for (int i = 0; i < NR_TASKS; ++i) {
+		if (task[i].task.PID == PID) { PID = random_pid(); i = 0; }
+	}
+
+	// Cambiamos los parámetros que son propios del hijo
+	// Cuales son los campos que hay que cambiar ??
 
 	return PID;
 }

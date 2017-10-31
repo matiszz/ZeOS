@@ -92,13 +92,14 @@ int sys_fork() {
 	// - Finalmente eliminamos la entrada temporal
 	for (int i = 0; i < NUM_PAG_DATA; ++i) {
 		// Debería comprobar que no hay nada ?? que no me vaya de rango y tal
-		int logica_tmp = PAG_LOG_INIT_DATA+NUM_PAG_DATA+i;
-		set_ss_pag(TP_padre, logica_tmp, fisicas[i]);
+		int logica_tmp = NUM_PAG_KERNEL+NUM_PAG_CODE+i;
+		set_ss_pag(TP_padre, logica_tmp+NUM_PAG_DATA, fisicas[i]);
 
-		unsigned int numFrame = get_frame(TP_padre, PAG_LOG_INIT_DATA+i);
+		//unsigned int numFrame = get_frame(TP_padre, PAG_LOG_INIT_DATA+i);
 
-		copy_data(&(numFrame), &(fisicas[i]), PAGE_SIZE);
-		del_ss_pag(TP_padre, logica_tmp);
+		copy_data((void *)(logica_tmp<<12), (void *)((logica_tmp+NUM_PAG_DATA)<<12), PAGE_SIZE);
+		//copy_data((numFrame>>12), &(fisicas[i]), PAGE_SIZE);
+		del_ss_pag(TP_padre, logica_tmp+NUM_PAG_DATA);
 	}
 	// - Por último, hacemos flush del TLB
 	set_cr3(current()->dir_pages_baseAddr);
@@ -109,13 +110,12 @@ int sys_fork() {
 
 	// Cambiamos los parámetros que son propios del hijo
 	
-
 	// Hacer ret_from_fork
 	uHijo->stack[KERNEL_STACK_SIZE-18] = (unsigned long)&ret_from_fork; //preparar la pila del hijo con lo que se espera el task_switch
 	uHijo->stack[KERNEL_STACK_SIZE-19] = 0;
-
 	pcb_hijo->esp = (int)&(uHijo->stack[KERNEL_STACK_SIZE-19]);
-
+	
+	// Añandimos el proceso hijo a la readyqueue
 	list_add_tail(&(pcb_hijo->list), &readyqueue);
 
 	return PID;

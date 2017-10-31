@@ -37,11 +37,11 @@ page_table_entry * get_PT (struct task_struct *t) {
 }
 
 void inner_task_switch(union task_union *nuevo) {
-	// Cambio pila de sistema.
+    // Cambio pila de sistema.
 	tss.esp0 = (unsigned long)&(nuevo->stack[KERNEL_STACK_SIZE]);
 
 	// Cambio de Tabla de Páginas
-	set_cr3(nuevo->task.dir_pages_baseAddr);
+	set_cr3(get_DIR(&nuevo->task));
 
 	// Guardamos en ebp el esp de nuevo
 	asm volatile("movl %%ebp, %0" /* %0 es el input */

@@ -94,12 +94,12 @@ void keyboard_routine() {
 }
 
 // Rutina del clock
-struct task_struct *idle_task;
 extern int zeos_ticks; // Extern la llama de fuera.
 void clock_routine() {
 	zeos_show_clock();
 	zeos_ticks++;
-	if (zeos_ticks >= 40) task_switch((union task_union *) idle_task);
+
+	planificador();
 }
 
 void keyboard_handler();

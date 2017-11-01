@@ -19,6 +19,7 @@ extern struct list_head blocked;
 struct task_struct *idle_task; 
 struct list_head freequeue; 				  // Tiene que ser global
 struct list_head readyqueue; 				  // Tiene que ser global
+int tiempoCPU = 0;
 
 struct task_struct *list_head_to_task_struct(struct list_head *l) {
 	int aux = (int)l&0xfffff000;
@@ -85,10 +86,14 @@ void init_idle (void) {
 	struct list_head *primer = list_first(&freequeue); // Obtenemos el primer elemento de la freequeue;
 	
 	struct task_struct *pcb_idle = list_head_to_task_struct(primer); // A partir del list_head sacamos el task_struct
-	list_del(primer); 			// Eliminamos este elemento
-	pcb_idle->PID = 0; 			// Asignamos el PID 0 al proceso
+	list_del(primer); 					// Eliminamos este elemento
+	allocate_DIR(pcb_idle); 			// Inicializamos el directorio de paginas del proceso task
 	
-	allocate_DIR(pcb_idle); 	// Inicializamos el directorio de paginas del proceso task
+	pcb_idle->PID = 0; 					// Asignamos el PID 0 al proceso
+	pcb_idle->estado_actual = ST_READY; // Le asignamos el estado actual
+	set_quantum(pcb_idle, QUANTUM_CPU); // Le asignamos el quantum
+
+	tiempoCPU = pcb_idle->quantum;
 
 	union task_union *uIdle = (union task_union*)pcb_idle;
 	uIdle->task = *(pcb_idle);
@@ -103,11 +108,15 @@ void init_task1(void) {
 	struct list_head *primer = list_first(&freequeue); // Obtenemos el primer elemento de la freequeue;
 	
 	struct task_struct *pcb_init = list_head_to_task_struct(primer); // A partir del list_head sacamos el task_struct
-	list_del(primer);			// Lo eliminamos
-	pcb_init->PID = 1; 			// Asignamos el PID 1 al proceso 
-	
-	allocate_DIR(pcb_init); 	// Inicializamos el directorio de paginas del proceso task1
+	list_del(primer);					// Lo eliminamos
+	allocate_DIR(pcb_init);			 	// Inicializamos el directorio de paginas del proceso task1
 	set_user_pages(pcb_init);
+
+	pcb_init->PID = 1; 					// Asignamos el PID 1 al proceso 
+	pcb_init->estado_actual = ST_READY; // Le asignamos el estado actual
+	set_quantum(pcb_init, QUANTUM_CPU); // Le asignamsos el quantum
+	
+	tiempoCPU = pcb_init->quantum;
 	
 	union task_union *uInit = (union task_union*)pcb_init;
 	uInit->task = *(pcb_init);
@@ -136,4 +145,72 @@ struct task_struct* current() {
   );
 
   return (struct task_struct*)(ret_value&0xfffff000);
+}
+
+// ################## Planificador ##################
+
+int get_quantum (struct task_struct *t) {
+	return t->quantum;
+}
+
+void set_quantum (struct task_struct *t, int new_quantum) {
+	t->quantum = new_quantum;
+}
+
+// Actualiza nº ticks que el proceso ha ejecutado desde que se asigno a la CPU
+void update_sched_data_rr() {
+	tiempoCPU--;
+}
+
+// Devuelve 1 si es necesario cambiar el estado del proceso current() y 0 en caso contrario
+int needs_sched_rr() {
+	if (tiempoCPU == 0) return 1;
+	return 0;
+}
+
+// Elige el siguiente proceso a ejecutar, lo saca de la ready queue y llama a un task_switch.
+void sched_next_rr() {
+	struct task_struct *pcb_siguiente;
+	if (list_empty(&readyqueue)) pcb_siguiente = idle_task;
+	else {
+		struct list_head *primero = list_first(&readyqueue);
+		pcb_siguiente = list_head_to_task_struct(primero);
+		list_del(primero);
+		pcb_siguiente->estado_actual = ST_RUN;
+
+		// Añadimos el que va a salir a la readyqueue, si no es idle
+		if(current()->PID != 0)	list_add_tail(&(current()->list), &readyqueue);
+	}
+
+	// Faltaria actualizar el quantum !! ??
+	union task_union *uSiguiente = (union task_union *)pcb_siguiente;
+	task_switch(uSiguiente);
+}
+
+// Actualiza el estado de un proceso.
+//  Si el estado no es Running, elimina el proceso de su cola.
+//  Si el nuevo estado no es Running, pone el proceso en una cola (free o ready)
+//  Si el nuevo estado es running, el queue debería ser null
+//  Al final, llama a sched_next_rr()
+void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
+	if (t->estado_actual != ST_RUN) list_del(&(t->list));
+	
+	// Si soy el siguiente en ir a run...
+	struct list_head *primero = list_first(&readyqueue);
+	struct task_struct *pcb_siguiente = list_head_to_task_struct(primero);
+
+	if (pcb_siguiente == t) dest = NULL;
+	else
+		if (t->estado_actual == ST_BLOCKED) list_add_tail(&(t->list), &readyqueue);
+
+	sched_next_rr();
+}
+
+void planificador() {
+	update_sched_data_rr();
+
+	if (needs_sched_rr() == 1) {
+		update_process_state_rr(current(), &readyqueue);
+		sched_next_rr();
+	}
 }

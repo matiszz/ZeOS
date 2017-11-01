@@ -74,7 +74,7 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL) {
 	idt[vector].highOffset      = highWord((DWord)handler);
 }
 
-	// Rutina del teclat
+// Rutina del teclat
 void keyboard_routine() {
  	unsigned char key;
  	key = inb(0x60); // Llegeix el port del teclat
@@ -93,9 +93,8 @@ void keyboard_routine() {
   	}
 }
 
-
-	// Rutina del clock
-extern struct task_struct *idle_task;
+// Rutina del clock
+struct task_struct *idle_task;
 extern int zeos_ticks; // Extern la llama de fuera.
 void clock_routine() {
 	zeos_show_clock();

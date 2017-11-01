@@ -16,14 +16,13 @@ union task_union protected_tasks[NR_TASKS+2]
 union task_union *task = &protected_tasks[1];
 
 extern struct list_head blocked;
-extern struct task_struct *idle_task; 
+struct task_struct *idle_task; 
 struct list_head freequeue; 				  // Tiene que ser global
 struct list_head readyqueue; 				  // Tiene que ser global
 
 struct task_struct *list_head_to_task_struct(struct list_head *l) {
-	unsigned long aux = (unsigned long)l;
-	unsigned long aux2 = aux&0xfffff000;
-	return (struct task_struct *)aux2;
+	int aux = (int)l&0xfffff000;
+	return (struct task_struct*)aux;
 }
 
 /* get_DIR - Returns the Page Directory address for task 't' */
@@ -93,12 +92,11 @@ void init_idle (void) {
 
 	union task_union *uIdle = (union task_union*)pcb_idle;
 	uIdle->task = *(pcb_idle);
-	uIdle->stack[KERNEL_STACK_SIZE-1] = (unsigned long)&cpu_idle; // Asignamos la direccion de la funcion cpu_idle
-	uIdle->stack[KERNEL_STACK_SIZE-2] = 0; 		// %ebp = 0
+	uIdle->stack[KERNEL_STACK_SIZE-1] = (unsigned long)&cpu_idle; 	// Asignamos la direccion de la funcion cpu_idle
+	uIdle->stack[KERNEL_STACK_SIZE-2] = 0; 							// %ebp = 0
 	pcb_idle->esp = (unsigned long)&(uIdle->stack[KERNEL_STACK_SIZE-2]);
 
-	idle_task = pcb_idle; // Hacemos que la variable global aputne al PCB de idle
-	idle_task = idle_task; // Para que el complilador no se queje
+	idle_task = pcb_idle;		// Hacemos que la variable global aputne al PCB de idle
 }
 
 void init_task1(void) {

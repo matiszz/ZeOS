@@ -95,7 +95,7 @@ void keyboard_routine() {
 
 
 	// Rutina del clock
-struct task_struct *idle_task;
+extern struct task_struct *idle_task;
 extern int zeos_ticks; // Extern la llama de fuera.
 void clock_routine() {
 	zeos_show_clock();

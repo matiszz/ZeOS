@@ -1,10 +1,19 @@
 #include <libc.h>
+#include <sched.h>
 
 char buff[24];
 int pid;
+extern struct task_struct *idle_task;
 int __attribute__ ((__section__(".text.main")))
 
 main(void) {
+  write(1, "PID idle: ", strlen("PID idle: "));
+  int pid = idle_task->PID;
+  char b[3];
+  itoa(pid, b);
+  write(1, b, strlen(b));
+  write(1, "Holi", strlen("Holi"));
+  
    /*
   write(1, " \n hola mati. PID: ", strlen(" \n hola mati. PID: "));
   int pid = getpid();

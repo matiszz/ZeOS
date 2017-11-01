@@ -95,11 +95,10 @@ void init_idle (void) {
 	uIdle->task = *(pcb_idle);
 	uIdle->stack[KERNEL_STACK_SIZE-1] = (unsigned long)&cpu_idle; // Asignamos la direccion de la funcion cpu_idle
 	uIdle->stack[KERNEL_STACK_SIZE-2] = 0; 		// %ebp = 0
-	//KERNEL_ESP(uIdle); 				// Hacemos que el Kernel_ESP apunte a la cima de la pila del contexto idle
 	pcb_idle->esp = (unsigned long)&(uIdle->stack[KERNEL_STACK_SIZE-2]);
 
 	idle_task = pcb_idle; // Hacemos que la variable global aputne al PCB de idle
-	//idle_task = idle_task; // Para que el complilador no se queje
+	idle_task = idle_task; // Para que el complilador no se queje
 }
 
 void init_task1(void) {

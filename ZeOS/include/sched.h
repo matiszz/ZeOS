@@ -7,6 +7,7 @@
 
 #include <list.h>
 #include <types.h>
+#include <stats.h>
 #include <mm_address.h>
 
 #define NR_TASKS      		10
@@ -22,6 +23,7 @@ struct task_struct {
 	int esp;
 	int quantum;
 	enum state_t estado_actual;
+	struct stats estadisticas;
 };
 
 union task_union {

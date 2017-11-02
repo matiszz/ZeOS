@@ -97,3 +97,24 @@ int fork() {
 		return -1;
 	}
 }
+
+void exit() {
+	asm ( "int $0x80"
+		:
+		: "a" (1)
+	);
+}
+
+int get_stats(int pid, struct stats *st) {
+	int resultado;
+	asm ( "int $0x80"
+		: "=a" (resultado)
+		: "a" (35), "b" (pid), "c" (st)
+	);
+
+	if (resultado >= 0) return resultado;
+	else {
+		errno = -resultado;
+		return -1;
+	}
+}

@@ -1,0 +1,25 @@
+Plex86/Bochs VGABios 0.6a 19 Aug 2006                                 09:23
+This VGA/VBE Bios is released under the GNU LGPL
+
+Please visit :
+ . http://bochs.sourceforge.net
+ . http://www.nongnu.org/vgabios
+
+NO Bochs VBE Support available!
+
+Bochs BIOS - build: 08/11/06
+$Revision: 1.166 $ $Date: 2006/08/11 17:34:12 $
+Options: apmbios pcibios eltorito
+
+
+Booting from Floppy...
+
+Loading..........................
+
+
+Kernel Loaded!    Entering user mode...
+
+
+
+
+

@@ -55,8 +55,7 @@ int sys_fork() {
 
 	// Creamos los dos tasks_union para poder copiar el del padre en el del hijo.
 	union task_union *uHijo = (union task_union*)pcb_hijo;
-	union task_union *uPadre = (union task_union*)current();
-	copy_data(uPadre, uHijo, sizeof(union task_union));
+	copy_data(current(), uHijo, sizeof(union task_union));
 
 	// Inicializar el Directorio de páginas del hijo
 	allocate_DIR(pcb_hijo);
@@ -64,11 +63,12 @@ int sys_fork() {
 	// Comprobar si hay suficiente espacio
 	int fisicas[NUM_PAG_DATA];
 	for (int i = 0; i < NUM_PAG_DATA; ++i) fisicas[i] = -5; // Pongo todos los valores a -5 
-	for (int i = 0; i < NUM_PAG_DATA; ++i) { // Veo si hay espacio suficiente
+	for (int i = 0; i < NUM_PAG_DATA; ++i) { 				// Veo si hay espacio suficiente
 		int num_pag = alloc_frame();
 		fisicas[i] = num_pag;
 		if (num_pag < 0) {
 			libera_frames(fisicas);
+			list_add_tail(primer, &freequeue); // Liberar el PCB
 			return -1;
 		}
 	}
@@ -91,25 +91,29 @@ int sys_fork() {
 	// - Luego copiamos los datos desde el frame del padre hasta el del hijo
 	// - Finalmente eliminamos la entrada temporal
 	for (int i = 0; i < NUM_PAG_DATA; ++i) {
-		// Debería comprobar que no hay nada ?? que no me vaya de rango y tal
 		int logica_tmp = NUM_PAG_KERNEL+NUM_PAG_CODE+i;
 		set_ss_pag(TP_padre, logica_tmp+NUM_PAG_DATA, fisicas[i]);
-
-		//unsigned int numFrame = get_frame(TP_padre, PAG_LOG_INIT_DATA+i);
-
 		copy_data((void *)(logica_tmp<<12), (void *)((logica_tmp+NUM_PAG_DATA)<<12), PAGE_SIZE);
-		//copy_data((numFrame>>12), &(fisicas[i]), PAGE_SIZE);
 		del_ss_pag(TP_padre, logica_tmp+NUM_PAG_DATA);
 	}
 	// - Por último, hacemos flush del TLB
-	set_cr3(current()->dir_pages_baseAddr);
+	set_cr3(get_DIR(current()));
 
 	// Comprobamos que el PID no existe y lo asignamos
 	PID = lastPID;
 	++lastPID;
+	pcb_hijo->PID=PID;
 
-	// Cambiamos los parámetros que son propios del hijo
-	
+	// Cambiamos cosas propias del hijo, estadisticas, etc.
+	pcb_hijo->estado_actual = ST_READY;
+	pcb_hijo->estadisticas.user_ticks = 0;
+	pcb_hijo->estadisticas.system_ticks = 0;
+	pcb_hijo->estadisticas.blocked_ticks = 0;
+	pcb_hijo->estadisticas.ready_ticks = 0;
+	pcb_hijo->estadisticas.elapsed_total_ticks = 0;
+	pcb_hijo->estadisticas.total_trans = 0;
+	pcb_hijo->estadisticas.remaining_ticks = 0;
+
 	// Hacer ret_from_fork
 	uHijo->stack[KERNEL_STACK_SIZE-18] = (unsigned long)&ret_from_fork; //preparar la pila del hijo con lo que se espera el task_switch
 	uHijo->stack[KERNEL_STACK_SIZE-19] = 0;
@@ -121,7 +125,23 @@ int sys_fork() {
 	return PID;
 }
 
-void sys_exit() {  
+void sys_exit() {
+	struct task_struct *pcb = current();
+	page_table_entry * TP_proc = get_PT(pcb);
+
+	// Liberamos todos los frames
+	for (int i = 0; i < NUM_PAG_DATA; ++i) {
+		int pag = PAG_LOG_INIT_DATA + i;
+		free_frame(get_frame(TP_proc, pag));
+		del_ss_pag(TP_proc, pag);
+	}
+
+	// Liberamos PCB
+	list_add_tail(&pcb->list, &freequeue);
+	pcb->PID = -1;
+
+	// Ponemos el siguiente proceso
+	sched_next_rr();
 }
 
 int sys_write(int fd, char * buffer, int size) {
@@ -136,4 +156,16 @@ int sys_write(int fd, char * buffer, int size) {
 
 int sys_gettime() {
 	return zeos_ticks;
+}
+
+int sys_get_stats(int pid, struct stats *st) {
+
+	for (int i = 0; i < NR_TASKS; ++i) {
+		if (task[i].task.PID == pid) {
+			task[i].task.estadisticas.remaining_ticks = tiempoCPU;
+			copy_to_user(&(task[i]. task.estadisticas), st, sizeof(struct stats));
+			return 0;
+		}
+	}
+	return 1;
 }

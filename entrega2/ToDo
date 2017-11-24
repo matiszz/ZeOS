@@ -1,0 +1,6 @@
+ToDo
+[x] init_sched tiene que llamar a init_sched_policy.
+[x Implementar get_task_stats y get_task_list.
+[x Completar implementación set_sched_policy (sys_call_table 17)
+[x Cambiar llamadas a scheduler de RR a generales.
+x] Checkcheckcheck.

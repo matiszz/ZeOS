@@ -8,15 +8,15 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-<!--  
- <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+ 
+ <a href="https://github.com/matiszz/ZeOS">
+    <img src="doc/logo.png" alt="Logo" width="80" height="80">
   </a>
- -->
+
   <h3 align="center">ZeOS</h3>
 
   <p align="center">
-    A basic, fully-functional operating system on command line.
+    A basic, fully-functional operating system on the command line.
   </p>
 </p>
 
@@ -24,7 +24,9 @@
 <!-- About the project -->
 ## 😎 About
 Project made for Operating Systems course of FIB - UPC. 
+
 It is a fully working operating system with basic system calls that runs on an emulator.
+
 Feel free to try it!
 
 

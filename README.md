@@ -76,7 +76,7 @@ Project Link: [https://github.com/matiszz/ZeOS.git](https://github.com/matiszz/Z
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=flat-square
+[contributors-shield]: https://img.shields.io/github/contributors/matiszz/ZeOS.svg?style=flat-square
 [contributors-url]: https://github.com/matiszz/ZeOS/graphs/contributors
 
 [license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=flat-square
